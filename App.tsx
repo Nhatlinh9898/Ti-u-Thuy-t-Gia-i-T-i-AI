@@ -10,6 +10,8 @@ import APIStatusPanel from './components/APIStatusPanel';
 import LocalLLMPanel from './components/LocalLLMPanel';
 import HybridAIService, { HybridConfig } from './services/hybridAIService';
 import HybridAIPanel from './components/HybridAIPanel';
+import GamificationPanel from './components/GamificationPanel';
+import GamificationService from './services/gamificationService';
 import { 
   Plus, 
   Wand2, 
@@ -21,7 +23,8 @@ import {
   Sparkles,
   ChevronRight,
   Loader2,
-  Settings
+  Settings,
+  Gamepad2
 } from 'lucide-react';
 
 const INITIAL_TREE: NovelNode = {
@@ -60,6 +63,9 @@ const App: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [promptContext, setPromptContext] = useState('');
   const [aiPanelOpen, setAiPanelOpen] = useState(true);
+  const [gamificationPanelOpen, setGamificationPanelOpen] = useState(false);
+
+  const gamificationService = GamificationService.getInstance();
 
   // Helper to find node by ID (BFS)
   const findNode = useCallback((root: NovelNode, id: string): NovelNode | null => {
@@ -123,6 +129,10 @@ const App: React.FC = () => {
       if (action === AIActionType.WRITE_CONTINUE) {
         newContent += `\n\n${result}`;
         updateNode(selectedNode.id, { content: newContent });
+        
+        // Track words written for gamification
+        const wordCount = result.split(/\s+/).length;
+        gamificationService.trackWordsWritten(wordCount);
       } else if (action === AIActionType.SUMMARIZE) {
         // Try parsing JSON
         try {
@@ -140,11 +150,17 @@ const App: React.FC = () => {
             const parsed = JSON.parse(cleanJson);
             newContent += `\n\n--- KẾT THÚC ---\n${parsed.KetThuc}\n\n>>> LỜI DẪN: ${parsed.DanChuyen || ''}`;
             updateNode(selectedNode.id, { content: newContent });
+            
+            // Track chapter completion for gamification
+            gamificationService.trackChapterCompletion();
         } catch (e) {
             newContent += `\n\n${result}`;
             updateNode(selectedNode.id, { content: newContent });
         }
       }
+
+      // Track AI usage for gamification
+      gamificationService.trackAIUsage();
 
     } catch (error) {
       alert("Lỗi khi gọi AI. Vui lòng kiểm tra API Key.");
@@ -195,6 +211,13 @@ const App: React.FC = () => {
         </h1>
 
         <div className="absolute right-6 flex gap-3">
+             <button 
+                 onClick={() => setGamificationPanelOpen(true)}
+                 className="p-2 rounded-full hover:bg-vip-700 transition-colors text-vip-300"
+                 title="Hệ Thống Game Hóa"
+             >
+                <Gamepad2 size={20} />
+             </button>
              <button className="p-2 rounded-full hover:bg-vip-700 transition-colors text-vip-300">
                 <Share2 size={20} />
              </button>
@@ -525,8 +548,12 @@ const App: React.FC = () => {
     <LocalLLMPanel />
     {/* HYBRID AI PANEL */}
     <HybridAIPanel />
+    {/* GAMIFICATION PANEL */}
+    <GamificationPanel 
+      isOpen={gamificationPanelOpen} 
+      onClose={() => setGamificationPanelOpen(false)} 
+    />
   </div>
 );
-};
 
 export default App;
