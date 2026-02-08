@@ -579,6 +579,7 @@ Focus on creating a seamless mobile experience with robust offline support.
         deviceId,
         sessionId,
         startTime: new Date(),
+        duration: 0, // seconds - will be updated when session ends
         actions: [],
         performance: await this.performanceEngine.getCurrentMetrics(),
         errors: [],

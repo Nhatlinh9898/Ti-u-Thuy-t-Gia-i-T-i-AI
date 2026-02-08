@@ -157,7 +157,8 @@ interface NovelTemplate {
   name: string;
   genre: string;
   description: string;
-  structure: Omit<NovelStructure, 'id' | 'title' | 'metadata'>;
+  structure: NovelStructure['structure'];
+  settings: NovelStructure['settings'];
   chapterTemplates: ChapterTemplate[];
   arcTemplates: ArcTemplate[];
 }

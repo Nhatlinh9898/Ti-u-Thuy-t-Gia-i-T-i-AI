@@ -218,7 +218,7 @@ class AIWritingAssistantService {
       background: this.generateBackground(node, sectionIndex),
       appearance: this.generateAppearance(node, sectionIndex),
       relationships: this.generateRelationships(node, sectionIndex),
-      arc: this.generateCharacterArc(node, index, sectionIndex)
+      arc: this.generateCharacterArc(node, sectionIndex)
     };
     
     return characterTemplate;

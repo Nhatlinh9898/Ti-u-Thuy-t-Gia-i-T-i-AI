@@ -102,7 +102,7 @@ class CinematicSceneGenerator {
       const analysis = await this.analyzeStoryForCinematics(storyContent);
       
       // Generate camera shots
-      const shots = await this.generateCameraShots(analysis, sceneConfig);
+      const shots = await this.createCameraShots(analysis, sceneConfig);
       
       // Create visual effects
       const effects = await this.createVisualEffects(analysis, sceneConfig);
@@ -318,7 +318,7 @@ Focus on creating visually compelling and emotionally resonant scenes.
       {
         id: 'cinematic-analysis',
         title: 'Cinematic Scene Analysis',
-        type: 'analysis',
+        type: 'novel',
         content: '',
         summary: '',
         children: []
@@ -436,7 +436,7 @@ Focus on creating visually compelling and emotionally resonant scenes.
           id: `shot-pov-${element.type}-${Date.now()}`,
           type: 'point_of_view',
           angle: 'eye_level',
-          movement: element.movement || 'static',
+          movement: (element.movement as any) || 'static',
           focus: 'sharp',
           composition: {
             rule_of_thirds: false,
@@ -455,8 +455,21 @@ Focus on creating visually compelling and emotionally resonant scenes.
     return shots;
   }
 
-  private async createVisualEffects(effectRequest: VisualEffectRequest): Promise<VisualEffect> {
-    const prompt = `
+  private async createVisualEffects(sceneAnalysis: any, config?: Partial<SceneConfig>): Promise<VisualEffect[]> {
+    const effects: VisualEffect[] = [];
+    
+    // Generate effects based on scene elements
+    if (sceneAnalysis.cinematicElements) {
+      for (const element of sceneAnalysis.cinematicElements) {
+        const effectRequest: VisualEffectRequest = {
+          type: element.type === 'action' ? 'particle' : element.type === 'emotional' ? 'color_grading' : 'lighting',
+          intensity: element.intensity || 0.7,
+          duration: element.duration || 3,
+          layer: 'foreground',
+          description: element.description || `Visual effect for ${element.type}`
+        };
+
+        const prompt = `
 Generate visual effect for this request:
 
 Effect Request:
@@ -477,20 +490,25 @@ Create detailed effect parameters for:
 Make it cinematic and professional.
     `.trim();
 
-    const result = await this.ultimateAI.generateContent(
-      {
-        id: 'visual-effect-generation',
-        title: 'Visual Effect Generation',
-        type: 'effect',
-        content: '',
-        summary: '',
-        children: []
-      },
-      AIActionType.WRITE_CONTINUE,
-      prompt
-    );
+        const result = await this.ultimateAI.generateContent(
+          {
+            id: 'visual-effect-generation',
+            title: 'Visual Effect Generation',
+            type: 'novel',
+            content: '',
+            summary: '',
+            children: []
+          },
+          AIActionType.WRITE_CONTINUE,
+          prompt
+        );
 
-    return this.parseVisualEffect(result.text, effectRequest);
+        const effect = this.parseVisualEffect(result.text, effectRequest);
+        effects.push(effect);
+      }
+    }
+
+    return effects;
   }
 
   private async generateMusicForMood(moodAnalysis: MoodAnalysis, config?: MusicConfig): Promise<MusicTrack> {
@@ -607,6 +625,7 @@ Make it professional and broadcast-quality.
     // Simple parsing - in production, use more sophisticated parsing
     return {
       mood: 'dramatic',
+      sceneDescription: 'A dramatic cinematic scene with emotional intensity and visual depth',
       emotionalMoments: [
         { type: 'revelation', character: 'protagonist', emotion: 'surprise' },
         { type: 'conflict', character: 'antagonist', emotion: 'anger' }
@@ -614,7 +633,7 @@ Make it professional and broadcast-quality.
       characters: ['protagonist', 'antagonist'],
       location: 'throne_room',
       actions: [
-        { character: 'protagonist', type: 'dialogue', movement: 'slow', duration: 5, intensity: 'medium' }
+        { character: 'protagonist', type: 'dialogue', movement: 'slow', duration: 5, intensity: 'medium', description: 'delivering important dialogue' }
       ],
       immersiveElements: [
         { type: 'environment', description: 'panoramic view', movement: 'slow', duration: 8 }
@@ -658,6 +677,348 @@ Make it professional and broadcast-quality.
         eq: { low: 0.6, mid: 0.7, high: 0.5 }
       },
       url: `https://example.com/music/cinematic-${Date.now()}.mp3`
+    };
+  }
+
+  // Missing methods implementation
+  private async generateSceneAudio(analysis: SceneAnalysis, config?: Partial<SceneConfig>): Promise<SceneAudio> {
+    const prompt = `
+Generate cinematic audio design for this scene analysis:
+
+Scene Analysis:
+- Mood: ${analysis.mood}
+- Characters: ${analysis.characters.join(', ')}
+- Location: ${analysis.location}
+- Actions: ${analysis.actions.map(a => a.type).join(', ')}
+- Pacing: ${analysis.pacing}
+
+Create audio design with:
+1. Dialogue tracks for character conversations
+2. Background music matching the mood
+3. Sound effects for actions and environment
+4. Ambient sounds for atmosphere
+5. Spatial audio positioning
+6. Proper audio mixing levels
+
+Make it immersive and professional.
+    `.trim();
+
+    const result = await this.ultimateAI.generateContent(
+      {
+        id: 'scene-audio-generation',
+        title: 'Scene Audio Generation',
+        type: 'novel', // Using valid NodeType
+        content: '',
+        summary: '',
+        children: []
+      },
+      AIActionType.WRITE_CONTINUE,
+      prompt
+    );
+
+    return this.parseSceneAudio(result.text, analysis);
+  }
+
+  private async setupSceneLighting(analysis: SceneAnalysis, config?: Partial<SceneConfig>): Promise<LightingSetup> {
+    const prompt = `
+Generate cinematic lighting setup for this scene analysis:
+
+Scene Analysis:
+- Mood: ${analysis.mood}
+- Location: ${analysis.location}
+- Lighting Requirements: ${analysis.lightingRequirements}
+- Pacing: ${analysis.pacing}
+
+Create lighting setup with:
+1. Key light configuration
+2. Fill light settings
+3. Back light placement
+4. Ambient light levels
+5. Color temperature
+6. Intensity levels
+7. Mood-appropriate lighting
+
+Make it cinematic and professional.
+    `.trim();
+
+    const result = await this.ultimateAI.generateContent(
+      {
+        id: 'scene-lighting-setup',
+        title: 'Scene Lighting Setup',
+        type: 'novel', // Using valid NodeType
+        content: '',
+        summary: '',
+        children: []
+      },
+      AIActionType.WRITE_CONTINUE,
+      prompt
+    );
+
+    return this.parseLightingSetup(result.text, analysis);
+  }
+
+  private async planCameraMovements(shots: CameraShot[], config?: Partial<SceneConfig>): Promise<CameraMovement[]> {
+    const movements: CameraMovement[] = [];
+    
+    for (let i = 0; i < shots.length; i++) {
+      const shot = shots[i];
+      const movement: CameraMovement = {
+        type: shot.movement === 'static' ? 'steady' : (shot.movement as any) || 'static',
+        direction: i % 2 === 0 ? 'right' : 'left',
+        speed: shot.type === 'close_up' ? 'slow' : shot.type === 'medium' ? 'medium' : 'fast',
+        smoothness: 0.8,
+        duration: shot.duration * 0.8,
+        easing: 'ease_in_out'
+      };
+      movements.push(movement);
+    }
+
+    return movements;
+  }
+
+  private async createSceneTransitions(shots: CameraShot[], config?: Partial<SceneConfig>): Promise<SceneTransition[]> {
+    const transitions: SceneTransition[] = [];
+    
+    for (let i = 0; i < shots.length - 1; i++) {
+      const transition: SceneTransition = {
+        type: i === 0 ? 'fade' : i % 3 === 0 ? 'dissolve' : 'cut',
+        duration: 1.5,
+        direction: i % 2 === 0 ? 'horizontal' : 'vertical',
+        parameters: {
+          smoothness: 0.7,
+          feather: 0.3
+        }
+      };
+      transitions.push(transition);
+    }
+
+    return transitions;
+  }
+
+  // Additional parsing methods
+  private parseSceneAudio(aiResponse: string, analysis: SceneAnalysis): SceneAudio {
+    return {
+      dialogue: analysis.characters.map((char, index) => ({
+        id: `dialogue-${char}-${Date.now()}`,
+        character: char,
+        dialogue: `Character dialogue for ${char}`,
+        timing: [{ start: index * 5, end: (index + 1) * 5 }],
+        volume: 0.8,
+        panning: 0
+      })),
+      music: [{
+        id: `music-${Date.now()}`,
+        title: `${analysis.mood} Scene Music`,
+        duration: 120,
+        tempo: analysis.pacing === 'fast' ? 120 : 80,
+        key: 'C minor',
+        timeSignature: '4/4',
+        instruments: ['piano', 'strings', 'percussion'],
+        layers: {
+          melody: { instrument: 'piano', volume: 0.7 },
+          harmony: { instrument: 'strings', volume: 0.5 },
+          rhythm: { instrument: 'percussion', volume: 0.6 },
+          bass: { instrument: 'cello', volume: 0.4 }
+        },
+        mixing: {
+          volume: 0.6,
+          compression: 0.3,
+          reverb: 0.2,
+          eq: { low: 0.6, mid: 0.7, high: 0.5 }
+        },
+        url: `https://example.com/music/scene-${Date.now()}.mp3`
+      }],
+      soundEffects: analysis.actions.map((action, index) => ({
+        id: `sfx-${action.type}-${Date.now()}`,
+        effect: `${action.type} sound effect`,
+        timing: index * 3,
+        volume: 0.7,
+        spatial: { x: 0, y: 0, z: 0 }
+      })),
+      ambient: [{
+        id: `ambient-${analysis.location}-${Date.now()}`,
+        type: 'nature',
+        intensity: 0.5,
+        volume: 0.3,
+        loop: true
+      }],
+      mix: {
+        masterVolume: 0.8,
+        dialogue: 0.8,
+        music: 0.6,
+        soundEffects: 0.7,
+        ambient: 0.3,
+        compression: 0.2,
+        limiting: 0.1
+      },
+      spatialAudio: {
+        enabled: true,
+        format: 'stereo',
+        reverb: {
+          roomSize: 0.5,
+          damping: 0.7,
+          wetLevel: 0.3,
+          dryLevel: 0.7,
+          predelay: 0.1
+        },
+        positioning: {
+          channels: 2,
+          speakerSetup: 'stereo',
+          distanceModel: 'inverse'
+        }
+      }
+    };
+  }
+
+  private parseLightingSetup(aiResponse: string, analysis: SceneAnalysis): LightingSetup {
+    return {
+      keyLight: {
+        type: 'key',
+        color: analysis.mood === 'dramatic' ? '#ff6b6b' : '#ffffff',
+        temperature: analysis.mood === 'dramatic' ? 3200 : 5600,
+        intensity: 0.8,
+        position: { x: 1, y: 2, z: 3 },
+        direction: { azimuth: 45, altitude: 30 }
+      },
+      fillLight: {
+        type: 'fill',
+        color: '#ffffff',
+        temperature: 5600,
+        intensity: 0.5,
+        position: { x: -1, y: 2, z: 2 },
+        direction: { azimuth: -45, altitude: 30 }
+      },
+      backLight: {
+        type: 'back',
+        color: '#ffffff',
+        temperature: 6500,
+        intensity: 0.6,
+        position: { x: 0, y: 3, z: -2 },
+        direction: { azimuth: 0, altitude: 60 }
+      },
+      ambientLight: {
+        type: 'natural',
+        color: analysis.mood === 'mysterious' ? '#4a5568' : '#f7fafc',
+        intensity: 0.3,
+        source: 'natural'
+      },
+      colorTemperature: analysis.mood === 'warm' ? 3200 : analysis.mood === 'cool' ? 6500 : 5600,
+      intensity: 0.7,
+      mood: analysis.mood as any
+    };
+  }
+
+  // Additional missing methods
+  private async generateVisualEffect(effectRequest: VisualEffectRequest): Promise<VisualEffect> {
+    const prompt = `
+Generate visual effect for this request:
+
+Effect Request:
+- Type: ${effectRequest.type}
+- Intensity: ${effectRequest.intensity}
+- Duration: ${effectRequest.duration}
+- Layer: ${effectRequest.layer}
+- Description: ${effectRequest.description}
+
+Create detailed effect parameters for:
+1. Particle systems (if applicable)
+2. Lighting changes
+3. Color grading adjustments
+4. Motion blur settings
+5. Depth of field configuration
+6. Timing and easing
+
+Make it cinematic and professional.
+    `.trim();
+
+    const result = await this.ultimateAI.generateContent(
+      {
+        id: 'visual-effect-generation',
+        title: 'Visual Effect Generation',
+        type: 'novel', // Using valid NodeType
+        content: '',
+        summary: '',
+        children: []
+      },
+      AIActionType.WRITE_CONTINUE,
+      prompt
+    );
+
+    return this.parseVisualEffect(result.text, effectRequest);
+  }
+
+  private async analyzeSceneMood(scene: CinematicScene): Promise<MoodAnalysis> {
+    const prompt = `
+Analyze the mood and emotion for this cinematic scene:
+
+Scene: ${scene.title}
+Description: ${scene.description}
+Duration: ${scene.duration}s
+Shots: ${scene.shots.length}
+Effects: ${scene.visualEffects.length}
+
+Provide mood analysis with:
+1. Primary emotion
+2. Intensity level (0-1)
+3. Appropriate tempo
+4. Musical style
+5. Recommended instruments
+
+Make it detailed and professional.
+    `.trim();
+
+    const result = await this.ultimateAI.generateContent(
+      {
+        id: 'scene-mood-analysis',
+        title: 'Scene Mood Analysis',
+        type: 'novel', // Using valid NodeType
+        content: '',
+        summary: '',
+        children: []
+      },
+      AIActionType.WRITE_CONTINUE,
+      prompt
+    );
+
+    return this.parseMoodAnalysis(result.text);
+  }
+
+  private async processCameraShots(shots: CameraShot[]): Promise<CameraShot[]> {
+    // Simulate processing shots for rendering
+    return shots.map(shot => ({
+      ...shot,
+      description: `Processed: ${shot.description}`
+    }));
+  }
+
+  private async processVisualEffects(effects: VisualEffect[]): Promise<VisualEffect[]> {
+    // Simulate processing effects for rendering
+    return effects.map(effect => ({
+      ...effect,
+      parameters: {
+        ...effect.parameters,
+        processed: true
+      }
+    }));
+  }
+
+  private async processSceneAudio(audio: SceneAudio): Promise<SceneAudio> {
+    // Simulate processing audio for rendering
+    return {
+      ...audio,
+      mix: {
+        ...audio.mix
+      }
+    };
+  }
+
+  private parseMoodAnalysis(aiResponse: string): MoodAnalysis {
+    return {
+      emotion: 'dramatic',
+      intensity: 0.8,
+      tempo: 120,
+      style: 'cinematic',
+      instruments: ['piano', 'strings', 'percussion', 'cello']
     };
   }
 
@@ -890,6 +1251,7 @@ interface VideoRenderData {
 
 interface SceneAnalysis {
   mood: string;
+  sceneDescription?: string;
   emotionalMoments: Array<{
     type: string;
     character: string;
@@ -903,6 +1265,7 @@ interface SceneAnalysis {
     movement: string;
     duration: number;
     intensity: string;
+    description: string;
   }>;
   immersiveElements: Array<{
     type: string;

@@ -237,6 +237,7 @@ interface MessageMetadata {
   contextRelevance: number; // 0-100
   emotionalAccuracy: number; // 0-100
   responseQuality: number; // 0-100
+  appropriateness: number; // 0-100
 }
 
 interface SessionContext {
@@ -350,7 +351,7 @@ Focus on creating a believable, engaging character with depth and complexity.
         {
           id: 'character-creation',
           title: 'Character Profile Creation',
-          type: 'character',
+          type: 'section',
           content: '',
           summary: '',
           children: []
@@ -457,7 +458,8 @@ Focus on creating a believable, engaging character with depth and complexity.
           personalityAlignment: 0,
           contextRelevance: 0,
           emotionalAccuracy: 0,
-          responseQuality: 0
+          responseQuality: 0,
+          appropriateness: 0
         }
       };
 
@@ -540,7 +542,7 @@ Focus on creating authentic, engaging character responses that drive the convers
         {
           id: 'character-response',
           title: 'Character Response Generation',
-          type: 'dialogue',
+          type: 'section',
           content: '',
           summary: '',
           children: []
@@ -947,7 +949,7 @@ class PersonalityEngine {
   }
 
   private makeMoreExtraverted(response: string): string {
-    return response + ' I'd love to hear more about that!';
+    return response + ' I\'d love to hear more about that!';
   }
 
   private makeMoreIntroverted(response: string): string {

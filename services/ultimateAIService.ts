@@ -103,6 +103,35 @@ class UltimateAIService {
         hybrid: { temperature: 0.7, maxTokens: 750, contextWindow: 3000 }
       },
       
+      // AI Training
+      training: {
+        customModels: false,
+        styleAdaptation: false,
+        dataPrivacy: true,
+        trainingDataSize: 1000,
+        fineTuningMethod: 'lora'
+      },
+      
+      // Analytics
+      analytics: {
+        realTimeMetrics: true,
+        usagePatterns: false,
+        performanceTrends: true,
+        goalTracking: false,
+        contentQuality: true,
+        predictiveAnalytics: false,
+        collaborationFeatures: false
+      },
+      
+      // Enterprise
+      enterprise: {
+        multiTenant: false,
+        roleBasedAccess: false,
+        auditLogs: false,
+        complianceReporting: false,
+        versionControl: false
+      },
+      
       // Default values
       ...config
     };
@@ -133,7 +162,7 @@ class UltimateAIService {
       let provider: 'local' | 'cloud' | 'hybrid' | 'ultimate' = 'local';
       let responseTime = Date.now() - startTime;
       let confidence = decision.confidence;
-      let reasoning = decision.reasoning;
+      let reasoning = [decision.reason];
       let features: string[] = [];
       
       if (decision.useLocal && this.config.providers.local.enabled) {
@@ -206,7 +235,7 @@ class UltimateAIService {
       // Task Analysis
       taskType: this.analyzeTaskComplexity(action),
       taskUrgency: this.analyzeTaskUrgency(node),
-      taskDomain: this.analyzeTaskDomain(node, action),
+      taskDomain: this.analyzeTaskDomain(node),
       
       // Content Analysis
       contentType: this.analyzeContentType(node.content),
@@ -275,9 +304,23 @@ class UltimateAIService {
     const bestDecision = Object.entries(decisions)
       .reduce((best, [key, decision]) => 
         decision.confidence > best.confidence ? decision : best
-      );
+      , decisions.aiAssistant);
     
-    return bestDecision;
+    return {
+      ...bestDecision,
+      features: this.getFeaturesForDecision(bestDecision)
+    };
+  }
+
+  private getFeaturesForDecision(decision: any): string[] {
+    const features: string[] = [];
+    
+    if (decision.useLocal) features.push('Local Processing');
+    if (decision.useCloud) features.push('Cloud Processing');
+    if (decision.useHybrid) features.push('Hybrid Mode');
+    if (decision.useAIAssistant) features.push('AI Writing Assistant');
+    
+    return features;
   }
 
   private async generateWithAIAssistant(
@@ -460,6 +503,224 @@ class UltimateAIService {
 
   private generateOutlinePoint(title: string): string {
     return `   ${title}`;
+  }
+
+  // Missing methods for AI Writing Assistant
+  private async analyzeWritingStyle(content: string): Promise<string> {
+    // Mock implementation for writing style analysis
+    const words = content.split(' ');
+    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const avgSentenceLength = words.length / sentences.length;
+    
+    return `# Phân tích văn phong
+
+- Độ dài trung bình từ: ${avgWordLength.toFixed(1)} ký tự
+- Độ dài trung bình câu: ${avgSentenceLength.toFixed(1)} từ
+- Tổng số từ: ${words.length}
+- Tổng số câu: ${sentences.length}
+- Văn phong: ${avgSentenceLength > 20 ? 'mô tả chi tiết' : avgSentenceLength > 15 ? 'cân bằng' : 'ngắn gọn, súc tích'}
+- Tông giọng: ${content.includes('!') ? 'nhiệt tình, cảm xúc' : 'trung tính, khách quan'}
+
+# Gợi ý cải thiện
+- ${avgWordLength < 4 ? 'Sử dụng từ đa dạng hơn' : 'Từ vựng phù hợp'}
+- ${avgSentenceLength < 10 ? 'Kết hợp câu dài và ngắn' : 'Cân bằng độ dài câu'}
+- ${sentences.length < 5 ? 'Phát triển thêm ý' : 'Cấu trúc câu tốt'}`;
+  }
+
+  private async generateCharacters(node: NovelNode, context: string): Promise<string> {
+    // Mock implementation for character generation
+    return `# Phân tích nhân vật
+
+## Nhân vật chính
+- **Tên**: ${this.generateCharacterName()}
+- **Tính cách**: ${this.generatePersonality()}
+- **Mục tiêu**: ${this.generateGoal()}
+- **Xung đột nội tâm**: ${this.generateInternalConflict()}
+
+## Nhân vật phụ
+- **Tên**: ${this.generateCharacterName()}
+- **Vai trò**: ${this.generateRole()}
+- **Mối quan hệ với nhân vật chính**: ${this.generateRelationship()}
+
+## Phát triển nhân vật
+- **Sự thay đổi dự kiến**: ${this.generateCharacterArc()}
+- **Điểm mạnh**: ${this.generateStrength()}
+- **Điểm yếu**: ${this.generateWeakness()}
+
+## Tương tác
+- **Đối thoại đặc trưng**: ${this.generateDialogueStyle()}
+- **Hành động biểu đạt**: ${this.generateActionStyle()}`;
+  }
+
+  private async generatePlotStructure(node: NovelNode, context: string): Promise<string> {
+    // Mock implementation for plot structure generation
+    return `# Cấu trúc cốt truyện
+
+## Mở đầu (Exposition)
+- **Bối cảnh**: ${this.generateSetting()}
+- **Giới thiệu nhân vật**: ${this.generateCharacterIntro()}
+- **Tình huống ban đầu**: ${this.generateInitialSituation()}
+
+## Phát triển (Rising Action)
+- **Sự kiện kích hoạt**: ${this.generateIncitingEvent()}
+- **Xung đột gia tăng**: ${this.generateRisingConflict()}
+- **Điểm quay đầu**: ${this.generateTurningPoint()}
+
+## Cao trào (Climax)
+- **Đỉnh điểm xung đột**: ${this.generateClimax()}
+- **Quyết định quan trọng**: ${this.generateCriticalDecision()}
+- **Hậu quả tức thời**: ${this.generateImmediateConsequence()}
+
+## Thắt thúc (Falling Action)
+- **Hạ nhiệt**: ${this.generateFallingAction()}
+- **Giải quyết từng phần**: ${this.generatePartialResolution()}
+- **Chuẩn bị kết thúc**: ${this.generatePreparation()}
+
+## Kết thúc (Resolution)
+- **Kết luận cuối cùng**: ${this.generateFinalResolution()}
+- **Thay đổi nhân vật**: ${this.generateCharacterChange()}
+- **Bài học rút ra**: ${this.generateMoral()}
+
+## Yếu tố phụ
+- **Chủ đề chính**: ${this.generateTheme()}
+- **Biểu tượng**: ${this.generateSymbolism()}
+- **Nút thắt phụ**: ${this.generateSubplots()}`;
+  }
+
+  // Helper methods for character generation
+  private generateCharacterName(): string {
+    const names = ['An', 'Minh', 'Linh', 'Hoàng', 'Mai', 'Quân', 'Hà', 'Tuấn'];
+    return names[Math.floor(Math.random() * names.length)];
+  }
+
+  private generatePersonality(): string {
+    const personalities = ['nhiệt tình, quyết đoán', 'trầm tư, sâu sắc', 'hài hước, lạc quan', 'cẩn trọng, thông minh'];
+    return personalities[Math.floor(Math.random() * personalities.length)];
+  }
+
+  private generateGoal(): string {
+    const goals = ['tìm kiếm sự thật', 'bảo vệ người thân', 'đạt được thành công', 'thay đổi bản thân'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private generateInternalConflict(): string {
+    const conflicts = ['giữa lý trí và tình cảm', 'giữa trách nhiệm và mong muốn cá nhân', 'giữa quá khứ và tương lai'];
+    return conflicts[Math.floor(Math.random() * conflicts.length)];
+  }
+
+  private generateRole(): string {
+    const roles = ['người bạn thân', 'người đối thủ', 'người cố vấn', 'nhân chứng'];
+    return roles[Math.floor(Math.random() * roles.length)];
+  }
+
+  private generateRelationship(): string {
+    const relationships = ['bạn thân thời thơ ấu', 'đối thủ cạnh tranh', 'người hướng dẫn', 'người yêu cũ'];
+    return relationships[Math.floor(Math.random() * relationships.length)];
+  }
+
+  private generateCharacterArc(): string {
+    const arcs = ['từ yếu đuối đến mạnh mẽ', 'từ ích kỷ đến vị tha', 'từ hoài nghi đến tin tưởng'];
+    return arcs[Math.floor(Math.random() * arcs.length)];
+  }
+
+  private generateStrength(): string {
+    const strengths = ['sự kiên trì', 'trí tuệ sắc bén', 'lòng trắc ẩn', 'dũng cảm'];
+    return strengths[Math.floor(Math.random() * strengths.length)];
+  }
+
+  private generateWeakness(): string {
+    const weaknesses = ['quá tự tin', 'nhạy cảm quá mức', 'khó tin tưởng người khác', 'cứng nhắc'];
+    return weaknesses[Math.floor(Math.random() * weaknesses.length)];
+  }
+
+  private generateDialogueStyle(): string {
+    const styles = ['trực tiếp, thẳng thắn', 'mang tính ẩn dụ, sâu sắc', 'hài hước, dí dỏm', 'trang trọng, lịch sự'];
+    return styles[Math.floor(Math.random() * styles.length)];
+  }
+
+  private generateActionStyle(): string {
+    const actions = ['quyết đoán, nhanh nhẹn', 'cẩn trọng, tính toán', 'tự phát, cảm tính', 'có chủ đích, có kế hoạch'];
+    return actions[Math.floor(Math.random() * actions.length)];
+  }
+
+  // Helper methods for plot generation
+  private generateSetting(): string {
+    const settings = ['một thành phố hiện thị sôi động', 'một ngôi làng yên bình', 'một môi trường công nghệ cao', 'một nơi hoang sơ, huyền bí'];
+    return settings[Math.floor(Math.random() * settings.length)];
+  }
+
+  private generateCharacterIntro(): string {
+    return 'Giới thiệu nhân vật chính trong bối cảnh đời thường, hé lộ những khía cạnh cơ bản của tính cách và hoàn cảnh';
+  }
+
+  private generateInitialSituation(): string {
+    const situations = ['cuộc sống bình thường bị xáo trộn', 'một cơ hội bất ngờ xuất hiện', 'một bí mật được hé lộ'];
+    return situations[Math.floor(Math.random() * situations.length)];
+  }
+
+  private generateIncitingEvent(): string {
+    const events = ['nhận được một tin tức quan trọng', 'gặp một người thay đổi cuộc đời', 'phát hiện một sự thật bất ngờ'];
+    return events[Math.floor(Math.random() * events.length)];
+  }
+
+  private generateRisingConflict(): string {
+    return 'Xung đột bắt đầu leo thang khi nhân vật đối mặt với những thử thách ngày càng khó khăn hơn';
+  }
+
+  private generateTurningPoint(): string {
+    return 'Nhân vật phải đưa ra một quyết định quan trọng sẽ ảnh hưởng đến toàn bộ tương lai';
+  }
+
+  private generateClimax(): string {
+    return 'Đỉnh điểm của mọi xung đột, nơi nhân vật phải đối mặt với thử thách lớn nhất';
+  }
+
+  private generateCriticalDecision(): string {
+    return 'Quyết định cuối cùng sẽ định hình số phận của nhân vật và kết cục của câu chuyện';
+  }
+
+  private generateImmediateConsequence(): string {
+    return 'Hậu quả ngay lập tức của quyết định ở đỉnh điểm, tạo ra sự thay đổi lớn';
+  }
+
+  private generateFallingAction(): string {
+    return 'Câu chuyện bắt đầu hạ nhiệt, giải quyết những vấn đề còn lại';
+  }
+
+  private generatePartialResolution(): string {
+    return 'Những xung đột nhỏ được giải quyết, hé lộ phần kết thúc';
+  }
+
+  private generatePreparation(): string {
+    return 'Chuẩn bị cho kết thúc cuối cùng, nhân vật phản ánh về hành trình đã qua';
+  }
+
+  private generateFinalResolution(): string {
+    const resolutions = ['nhân vật đạt được mục tiêu', 'nhân vật học được bài học quan trọng', 'nhân vật tìm thấy sự bình yên'];
+    return resolutions[Math.floor(Math.random() * resolutions.length)];
+  }
+
+  private generateCharacterChange(): string {
+    return 'Nhân vật đã trưởng thành và thay đổi qua những trải nghiệm';
+  }
+
+  private generateMoral(): string {
+    const morals = ['sự kiên trì luôn được đền đáp', 'tình bạn có sức mạnh to lớn', 'hãy tin vào chính mình'];
+    return morals[Math.floor(Math.random() * morals.length)];
+  }
+
+  private generateTheme(): string {
+    const themes = ['tình yêu và sự hy sinh', 'sự trưởng thành và tự khám phá', 'công lý và sự thật'];
+    return themes[Math.floor(Math.random() * themes.length)];
+  }
+
+  private generateSymbolism(): string {
+    return 'Những biểu tượng ẩn sau các sự kiện, mang ý nghĩa sâu sắc hơn';
+  }
+
+  private generateSubplots(): string {
+    return 'Những câu chuyện phụ bổ trợ cho cốt truyện chính';
   }
 
   // Configuration methods

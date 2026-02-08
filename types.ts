@@ -1,4 +1,4 @@
-export type NodeType = 'novel' | 'part' | 'chapter' | 'act' | 'section';
+export type NodeType = 'novel' | 'part' | 'chapter' | 'act' | 'section' | 'dashboard' | 'insights' | 'character' | 'relationship' | 'music' | 'configuration' | 'world' | 'scene' | 'branch' | 'sound_effect' | 'planning';
 
 export interface NovelNode {
   id: string;

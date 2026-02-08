@@ -418,7 +418,7 @@ class HybridAIService {
     }
   }
 
-  private updateUsageStats(provider: 'local' | 'cloud' | 'error', responseTime: number, success: boolean) {
+  private updateUsageStats(provider: 'local' | 'cloud' | 'hybrid' | 'error', responseTime: number, success: boolean) {
     if (provider === 'local') {
       this.usageStats.local.requests++;
       if (success) this.usageStats.local.success++;
@@ -427,6 +427,17 @@ class HybridAIService {
       this.usageStats.cloud.requests++;
       if (success) this.usageStats.cloud.success++;
       else this.usageStats.cloud.errors++;
+    } else if (provider === 'hybrid') {
+      // For hybrid, count as both local and cloud usage
+      this.usageStats.local.requests++;
+      this.usageStats.cloud.requests++;
+      if (success) {
+        this.usageStats.local.success++;
+        this.usageStats.cloud.success++;
+      } else {
+        this.usageStats.local.errors++;
+        this.usageStats.cloud.errors++;
+      }
     }
     
     this.usageStats.total.requests++;

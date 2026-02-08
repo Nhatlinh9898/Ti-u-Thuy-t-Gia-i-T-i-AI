@@ -712,7 +712,7 @@ Consider the character's current state and the chapter events. Development shoul
         {
           id: `development-${character.id}-${chapter.id}`,
           title: `Development: ${character.name} - ${chapter.title}`,
-          type: 'development',
+          type: 'character',
           content: '',
           summary: '',
           children: []

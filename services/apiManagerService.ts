@@ -231,7 +231,7 @@ class APIManager {
     return reset.getTime() - now.getTime();
   }
 
-  public async makeRequest(prompt: string, tokensNeeded: number = 0): Promise<{ response: string; apiUsed: string; waitTime?: number }> {
+  public async makeRequest(prompt: string, tokensNeeded: number = 0): Promise<{ response: string; apiUsed: string; waitTime?: number; apiConfig?: { key: string; baseUrl: string; model: string } }> {
     const apiIndex = this.getNextAvailableAPI();
     const api = this.apis[apiIndex];
     

@@ -763,7 +763,7 @@ Focus on creating realistic, professional-quality sound effects.
   }
 
   private generateTags(category: SFXCategory, description: string): string[] {
-    const tags = [category];
+    const tags = [category as string];
     const words = description.toLowerCase().split(' ');
     tags.push(...words.filter(word => word.length > 3));
     return [...new Set(tags)]; // Remove duplicates
@@ -828,7 +828,7 @@ Focus on creating realistic, professional-quality sound effects.
     query: string,
     filters?: SearchFilters
   ): boolean {
-    const searchText = `${item.title} ${item.description} ${(item as MusicTrack).genre || ''} ${(item as SoundEffect).category || ''}`.toLowerCase();
+    const searchText = `${(item as MusicTrack).title || (item as SoundEffect).name} ${(item as SoundEffect).description || ''} ${(item as MusicTrack).genre || ''} ${(item as SoundEffect).category || ''}`.toLowerCase();
     
     // Basic text search
     const textMatch = searchText.includes(query);
@@ -850,11 +850,11 @@ Focus on creating realistic, professional-quality sound effects.
   }
 
   private calculateRelevance(item: MusicTrack | SoundEffect, query: string): number {
-    const searchText = `${item.title} ${item.description}`.toLowerCase();
+    const searchText = `${(item as MusicTrack).title || (item as SoundEffect).name} ${(item as SoundEffect).description || ''}`.toLowerCase();
     const exactMatch = searchText === query ? 100 : 0;
     const partialMatch = searchText.includes(query) ? 50 : 0;
-    const titleMatch = item.title.toLowerCase().includes(query) ? 30 : 0;
-    const descriptionMatch = item.description.toLowerCase().includes(query) ? 20 : 0;
+    const titleMatch = ((item as MusicTrack).title || (item as SoundEffect).name || '').toLowerCase().includes(query) ? 30 : 0;
+    const descriptionMatch = ((item as SoundEffect).description || '').toLowerCase().includes(query) ? 20 : 0;
     
     return exactMatch + partialMatch + titleMatch + descriptionMatch;
   }

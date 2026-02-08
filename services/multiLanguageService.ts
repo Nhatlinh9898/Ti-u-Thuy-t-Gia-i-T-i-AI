@@ -60,6 +60,28 @@ interface CurrencyFormat {
   decimalSeparator: string;
 }
 
+interface TranslationProvider {
+  name: string;
+  type: 'google' | 'azure' | 'aws' | 'deepl' | 'openai' | 'custom';
+  apiEndpoint?: string;
+  supportedLanguages: string[];
+  features: TranslationFeature[];
+  pricing: PricingModel;
+}
+
+interface TranslationFeature {
+  id: string;
+  name: string;
+  description: string;
+  supported: boolean;
+}
+
+interface PricingModel {
+  model: 'per-character' | 'per-word' | 'per-minute' | 'monthly';
+  rate: number;
+  currency: string;
+}
+
 interface TranslationSettings {
   provider: TranslationProvider;
   apiKey?: string;
@@ -432,8 +454,28 @@ class MultiLanguageService {
   // Initialize multi-language support
   public async initializeMultiLanguage(
     defaultLanguage: string = 'en',
-    translationProvider: TranslationProvider = 'google',
-    voiceProvider: VoiceProvider = 'azure'
+    translationProvider: TranslationProvider = {
+      name: 'Google Translate',
+      type: 'google',
+      supportedLanguages: ['en', 'vi', 'ja', 'zh', 'es', 'fr', 'de', 'ko'],
+      features: [
+        { id: 'text-translation', name: 'Text Translation', description: 'Translate text between languages', supported: true },
+        { id: 'auto-detect', name: 'Auto Detect Language', description: 'Automatically detect source language', supported: true },
+        { id: 'cultural-adaptation', name: 'Cultural Adaptation', description: 'Adapt translations for cultural context', supported: true }
+      ],
+      pricing: { model: 'per-character', rate: 0.00002, currency: 'USD' }
+    },
+    voiceProvider: VoiceProvider = {
+      name: 'Azure TTS',
+      type: 'neural',
+      supportedLanguages: ['en', 'vi', 'ja', 'zh', 'es', 'fr', 'de', 'ko'],
+      features: [
+        { id: 'neural-voice', name: 'Neural Voice', description: 'High quality neural voice synthesis', supported: true, quality: { level: 'high', sampleRate: 24000, bitrate: 128, format: 'mp3' } },
+        { id: 'emotion', name: 'Emotion Support', description: 'Express emotions in voice', supported: true, quality: { level: 'high', sampleRate: 24000, bitrate: 128, format: 'mp3' } },
+        { id: 'voice-cloning', name: 'Voice Cloning', description: 'Create custom voices', supported: true, quality: { level: 'ultra', sampleRate: 48000, bitrate: 320, format: 'wav' } }
+      ],
+      pricing: { model: 'per-character', rate: 0.000016, currency: 'USD' }
+    }
   ): Promise<MultiLanguageConfig> {
     try {
       const prompt = `
@@ -559,8 +601,15 @@ Focus on creating a comprehensive, culturally-aware multi-language system.
         pitch: 1.0,
         volume: 1.0,
         format: 'mp3',
-        quality: this.config.voiceSettings.quality,
-        customSettings: options,
+        quality: this.createVoiceQuality(this.config.voiceSettings.quality),
+        customSettings: {
+          emphasis: [],
+          pauses: [],
+          pronunciation: [],
+          ssml: false,
+          prosody: { contour: '', range: 1, rate: 1, volume: 1 },
+          ...options
+        },
         priority: 'medium'
       };
 
@@ -698,7 +747,17 @@ Focus on creating a comprehensive, culturally-aware multi-language system.
       defaultLanguage: 'en',
       supportedLanguages: [],
       translationSettings: {
-        provider: 'google',
+        provider: {
+          name: 'Google Translate',
+          type: 'google',
+          supportedLanguages: ['en', 'vi', 'ja', 'zh', 'es', 'fr', 'de', 'ko'],
+          features: [
+            { id: 'text-translation', name: 'Text Translation', description: 'Translate text between languages', supported: true },
+            { id: 'auto-detect', name: 'Auto Detect Language', description: 'Automatically detect source language', supported: true },
+            { id: 'cultural-adaptation', name: 'Cultural Adaptation', description: 'Adapt translations for cultural context', supported: true }
+          ],
+          pricing: { model: 'per-character', rate: 0.00002, currency: 'USD' }
+        },
         model: 'google-translate',
         quality: 'professional',
         autoDetect: true,
@@ -710,7 +769,17 @@ Focus on creating a comprehensive, culturally-aware multi-language system.
         contextAwareness: true
       },
       voiceSettings: {
-        provider: 'azure',
+        provider: {
+          name: 'Azure TTS',
+          type: 'neural',
+          supportedLanguages: ['en', 'vi', 'ja', 'zh', 'es', 'fr', 'de', 'ko'],
+          features: [
+            { id: 'neural-voice', name: 'Neural Voice', description: 'High quality neural voice synthesis', supported: true, quality: { level: 'high', sampleRate: 24000, bitrate: 128, format: 'mp3' } },
+            { id: 'emotion', name: 'Emotion Support', description: 'Express emotions in voice', supported: true, quality: { level: 'high', sampleRate: 24000, bitrate: 128, format: 'mp3' } },
+            { id: 'voice-cloning', name: 'Voice Cloning', description: 'Create custom voices', supported: true, quality: { level: 'ultra', sampleRate: 48000, bitrate: 320, format: 'wav' } }
+          ],
+          pricing: { model: 'per-character', rate: 0.000016, currency: 'USD' }
+        },
         defaultVoice: 'default',
         voiceCloning: true,
         emotionSupport: true,
@@ -971,6 +1040,20 @@ Focus on creating a comprehensive, culturally-aware multi-language system.
     const format = languageConfig.numberFormats.find(f => f.type === 'decimal');
     return format ? number.toLocaleString() : text;
   }
+
+  private createVoiceQuality(quality: 'low' | 'medium' | 'high' | 'ultra'): VoiceQuality {
+    const qualitySettings = {
+      low: { sampleRate: 8000, bitrate: 32, format: 'mp3' as const },
+      medium: { sampleRate: 16000, bitrate: 64, format: 'mp3' as const },
+      high: { sampleRate: 24000, bitrate: 128, format: 'mp3' as const },
+      ultra: { sampleRate: 48000, bitrate: 320, format: 'wav' as const }
+    };
+
+    return {
+      level: quality,
+      ...qualitySettings[quality]
+    };
+  }
 }
 
 // Supporting classes
@@ -1069,13 +1152,13 @@ class CulturalEngine {
         // Apply cultural adaptations based on language
         switch (language) {
           case 'vi':
-            adaptedText = text.replace /\bhello\b/gi, 'xin chào');
+            adaptedText = text.replace(/\bhello\b/gi, 'xin chào');
             break;
           case 'ja':
-            adaptedText = text.replace /\bhello\b/gi, 'こんにちは');
+            adaptedText = text.replace(/\bhello\b/gi, 'こんにちは');
             break;
           case 'en':
-            adaptedText = text.replace /\bhello\b/gi, context?.formality === 'formal' ? 'Greetings' : 'Hello');
+            adaptedText = text.replace(/\bhello\b/gi, context?.formality === 'formal' ? 'Greetings' : 'Hello');
             break;
         }
         
@@ -1153,7 +1236,8 @@ class LocalizationEngine {
     // Simulate number formatting
     return number.toLocaleString();
   }
-}
+
+  }
 
 export default MultiLanguageService;
 export type {
@@ -1163,6 +1247,9 @@ export type {
   DateFormat,
   NumberFormat,
   CurrencyFormat,
+  TranslationProvider,
+  TranslationFeature,
+  PricingModel,
   TranslationSettings,
   VoiceSettings,
   VoiceProvider,

@@ -569,7 +569,7 @@ Content should be:
         {
           id: `content-${Date.now()}`,
           title: 'Social Media Content Generation',
-          type: 'writing',
+          type: 'scene',
           content: '',
           summary: '',
           children: []
@@ -644,12 +644,12 @@ Content should be:
     };
   }
 
-  private parseGeneratedContent(aiResponse: string, voice: StoredVoice, contentType: string): GeneratedContent {
+  private parseGeneratedContent(aiResponse: string, voice: StoredVoice, contentType: 'story_reading' | 'character_intro' | 'chapter_summary' | 'behind_scenes'): GeneratedContent {
     // Simple parsing - in production, use more sophisticated parsing
     const lines = aiResponse.split('\n');
     let title = '';
     let content = '';
-    let hashtags: string[] = '';
+    let hashtags: string[] = [];
     let callToAction = '';
 
     lines.forEach(line => {
@@ -678,7 +678,7 @@ Content should be:
     };
   }
 
-  private createFallbackContent(voice: StoredVoice, contentType: string): GeneratedContent {
+  private createFallbackContent(voice: StoredVoice, contentType: 'story_reading' | 'character_intro' | 'chapter_summary' | 'behind_scenes'): GeneratedContent {
     return {
       id: `content-fallback-${Date.now()}`,
       voiceId: voice.id,
@@ -698,7 +698,7 @@ Content should be:
     const lines = aiResponse.split('\n');
     let optimalTimes: string[] = [];
     let contentTypes: string[] = [];
-    let frequency = 'daily';
+    let frequency: 'daily' | 'weekly' | 'monthly' | 'custom' = 'daily';
     let recommendations: string[] = [];
 
     lines.forEach(line => {
@@ -707,7 +707,8 @@ Content should be:
       } else if (line.toLowerCase().includes('content types:')) {
         contentTypes = line.split(':')[1]?.trim().split(',').map(t => t.trim()) || [];
       } else if (line.toLowerCase().includes('frequency:')) {
-        frequency = line.split(':')[1]?.trim() as any || 'daily';
+        const parsedFrequency = line.split(':')[1]?.trim() as 'daily' | 'weekly' | 'monthly' | 'custom';
+        frequency = ['daily', 'weekly', 'monthly', 'custom'].includes(parsedFrequency) ? parsedFrequency : 'daily';
       }
     });
 

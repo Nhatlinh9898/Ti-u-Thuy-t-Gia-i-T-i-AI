@@ -59,6 +59,16 @@ interface StoryChoice {
   characterDevelopment: CharacterDevelopment;
 }
 
+interface DialogueLine {
+  id: string;
+  characterId: string;
+  characterName: string;
+  text: string;
+  emotion?: string;
+  timing?: number;
+  choices?: string[];
+}
+
 interface InteractiveScene {
   id: string;
   title: string;
@@ -283,7 +293,12 @@ class InteractiveStoryEngine {
           globalEvents: []
         },
         userHistory: [],
-        currentEmotion: 'neutral',
+        currentEmotion: {
+          primary: 'neutral',
+          intensity: 0.5,
+          triggers: [],
+          duration: 0
+        },
         achievements: [],
         progress: {
           branchesExplored: 0,
@@ -435,7 +450,12 @@ Make it interactive and engaging with meaningful choices.
       delayedEffects: [],
       characterChanges: [],
       worldChanges: [],
-      emotionalImpact: choice.emotionalImpact,
+      emotionalImpact: {
+        primary: choice.emotionalState.primary,
+        secondary: choice.emotionalState.triggers,
+        intensity: choice.emotionalState.intensity,
+        duration: choice.emotionalState.duration > 0 ? 'temporary' : 'permanent'
+      },
       narrativeProgress: 0.1
     };
   }
@@ -521,7 +541,7 @@ Make it engaging and emotionally resonant.
       timeOfDay: context.worldState.timeOfDay,
       weather: context.worldState.weather,
       presentCharacters: Array.from(context.characterStates.keys()),
-      emotionalTone: context.currentEmotion,
+      emotionalTone: context.currentEmotion.primary,
       narrativeTension: this.calculateNarrativeTension(context),
       userProgress: context.userHistory.length,
       availableActions: this.determineAvailableActions(context)
@@ -554,7 +574,7 @@ Make it immersive and responsive to the situation.
       {
         id: 'dynamic-content',
         title: 'Dynamic Content Generation',
-        type: 'content',
+        type: 'scene',
         content: '',
         summary: '',
         children: []
@@ -582,7 +602,7 @@ Make it immersive and responsive to the situation.
     // Calculate tension based on various factors
     const baseTension = 0.5;
     const historyWeight = Math.min(context.userHistory.length / 10, 1);
-    const emotionalWeight = context.currentEmotion === 'fear' ? 0.3 : 0;
+    const emotionalWeight = context.currentEmotion.primary === 'fear' ? 0.3 : 0;
     
     return Math.min(baseTension + historyWeight + emotionalWeight, 1);
   }
@@ -958,6 +978,7 @@ export type {
   StoryCharacter,
   StoryBranch,
   StoryChoice,
+  DialogueLine,
   InteractiveScene,
   UserChoice,
   StoryContext,

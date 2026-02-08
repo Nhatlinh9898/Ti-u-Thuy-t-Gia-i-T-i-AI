@@ -644,7 +644,7 @@ Focus on creating a professional, feature-rich visual editor.
         {
           id: 'visual-editor-creation',
           title: 'Visual Editor Creation',
-          type: 'editor',
+          type: 'scene',
           content: '',
           summary: '',
           children: []
@@ -675,6 +675,7 @@ Focus on creating a professional, feature-rich visual editor.
         id: `gen-${Date.now()}`,
         type: 'illustration',
         prompt,
+        style: 'digital art', // Add required style property
         parameters: {
           width: 1024,
           height: 1024,
@@ -766,15 +767,19 @@ Focus on creating a memorable, expressive character.
         id: `style-transfer-${Date.now()}`,
         type: 'style_transfer',
         prompt: `Apply artistic style transfer to image`,
+        style: 'artistic',
         reference: styleReference,
         parameters: {
           width: 1024,
           height: 1024,
+          aspectRatio: '1:1',
           quality: 'high',
           steps: 20,
           guidance: 5,
           strength,
-          cfgScale: 5
+          cfgScale: 5,
+          sampler: 'DPM++ 2M Karras',
+          scheduler: 'Karras'
         },
         priority: 'medium'
       };
@@ -804,14 +809,19 @@ Focus on creating a memorable, expressive character.
         id: `enhance-${Date.now()}`,
         type: 'enhancement',
         prompt: `Enhance image quality using ${enhancementType}`,
+        style: 'enhancement',
         reference: imageUrl,
         parameters: {
           width: enhancementType === 'upscale' ? 2048 : 1024,
           height: enhancementType === 'upscale' ? 2048 : 1024,
+          aspectRatio: '1:1',
           quality: 'ultra',
           steps: 15,
           guidance: 3,
-          strength: 0.5
+          strength: 0.5,
+          cfgScale: 7.5,
+          sampler: 'DPM++ 2M Karras',
+          scheduler: 'Karras'
         },
         priority: 'medium'
       };
@@ -850,6 +860,7 @@ Focus on creating a memorable, expressive character.
       locked: false,
       opacity: 1,
       blendMode: 'normal',
+      effects: [],
       content: {
         data: content || '',
         format: 'png',

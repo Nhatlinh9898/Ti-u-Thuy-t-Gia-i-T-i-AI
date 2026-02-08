@@ -787,7 +787,8 @@ Focus on providing valuable, actionable insights for data-driven decisions.
       kpi_dashboard: 'Key performance indicators',
       funnel_analysis: 'Conversion funnel analysis',
       cohort_analysis: 'User cohort analysis',
-      retention_analysis: 'User retention analysis'
+      retention_analysis: 'User retention analysis',
+      revenue_analytics: 'Track revenue and financial metrics'
     };
 
     return descriptions[widgetType] || 'Analytics widget';
@@ -809,7 +810,8 @@ Focus on providing valuable, actionable insights for data-driven decisions.
       kpi_dashboard: ['revenue', 'user_growth', 'customer_satisfaction'],
       funnel_analysis: ['step_completion_rate', 'drop_off_rate', 'conversion_time'],
       cohort_analysis: ['retention_rate', 'lifetime_value', 'churn_rate'],
-      retention_analysis: ['day_1_retention', 'day_7_retention', 'day_30_retention']
+      retention_analysis: ['day_1_retention', 'day_7_retention', 'day_30_retention'],
+      revenue_analytics: ['revenue', 'average_order_value', 'revenue_growth']
     };
 
     return defaultMetrics[widgetType] || [];
@@ -831,7 +833,8 @@ Focus on providing valuable, actionable insights for data-driven decisions.
       kpi_dashboard: ['view', 'export'],
       funnel_analysis: ['view', 'export'],
       cohort_analysis: ['view', 'export'],
-      retention_analysis: ['view', 'export']
+      retention_analysis: ['view', 'export'],
+      revenue_analytics: ['view', 'export', 'admin']
     };
 
     return permissions[widgetType] || ['view'];

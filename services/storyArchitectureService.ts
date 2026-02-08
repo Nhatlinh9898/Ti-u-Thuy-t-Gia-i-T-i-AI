@@ -344,7 +344,7 @@ Structure the story for maximum impact and reader engagement.
         {
           id: 'structure-generation',
           title: 'Story Structure Generation',
-          type: 'planning',
+          type: 'novel',
           content: '',
           summary: '',
           children: []
@@ -624,7 +624,7 @@ Focus on helping the writer stay true to the story architecture while improving 
         {
           id: `suggestions-${sceneId}`,
           title: 'Content Suggestions',
-          type: 'assistance',
+          type: 'scene',
           content: '',
           summary: '',
           children: []
@@ -872,6 +872,7 @@ Focus on helping the writer stay true to the story architecture while improving 
           duration: '',
           mood: 'neutral',
           keyEvents: [],
+          emotionalImpact: 'medium',
           connections: []
         });
       });
@@ -987,6 +988,7 @@ Focus on helping the writer stay true to the story architecture while improving 
         duration: '',
         mood: 'neutral',
         keyEvents: [],
+        emotionalImpact: 'medium',
         connections: []
       }
     ];

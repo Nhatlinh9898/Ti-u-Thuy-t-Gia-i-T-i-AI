@@ -366,7 +366,7 @@ For each idea, provide:
         {
           id: 'idea-generation',
           title: 'AI Idea Generation',
-          type: 'planning',
+          type: 'dashboard',
           content: '',
           summary: '',
           children: []
@@ -481,7 +481,7 @@ Provide:
         {
           id: 'idea-combination',
           title: 'AI Idea Combination',
-          type: 'planning',
+          type: 'dashboard',
           content: '',
           summary: '',
           children: []

@@ -189,7 +189,7 @@ class LocalLLMService {
     });
   }
 
-  private generateMockResponse(prompt: string, modelIndex: number): string {
+  private async generateMockResponse(prompt: string, modelIndex: number): Promise<string> {
     const model = this.models[modelIndex];
     
     // Mock responses theo từng model
